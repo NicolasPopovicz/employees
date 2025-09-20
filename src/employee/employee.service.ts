@@ -1,6 +1,7 @@
 import { Injectable } from '@nestjs/common';
-import { EmployeeDTO } from 'src/dtos/EmployeeDto';
-import { DefaultReturn, ListDocuments } from 'src/interfaces/ReturnObject';
+import { EmployeeDTO } from 'src/employee/dto/Employee';
+import { StatusEnum } from 'src/enums/StatusDocument';
+import { DefaultReturn, ListDocuments, PendingDocumentEmployee } from 'src/interfaces/ReturnObject';
 
 @Injectable()
 export class EmployeeService {
@@ -42,7 +43,7 @@ export class EmployeeService {
   listEmployeeDocumentsStatus(id: string): DefaultReturn|ListDocuments {
     if (!/^\d+$/.test(id)) {
       return {
-        message: 'Parâmetros fornecido é inválido!',
+        message: 'Parâmetro fornecido é inválido!',
         status: false
       };
     }
@@ -53,21 +54,53 @@ export class EmployeeService {
       documents: [
         {
           type: 'CPF',
-          status: 'PENDENTE'
+          status: StatusEnum.PENDING
         },
         {
           type: 'CNPJ',
-          status: 'ENVIADO'
+          status: StatusEnum.SENDED
         },
         {
           type: 'CTPS',
-          status: 'ENVIADO'
+          status: StatusEnum.SENDED
         },
         {
           type: 'CNH',
-          status: 'ENVIADO'
+          status: StatusEnum.SENDED
         }
       ]
     }
+  }
+
+  listEmployeesPendingDocuments(): PendingDocumentEmployee[] {
+    return [
+      {
+        id: 3,
+        employee: 'Nicolas Popovicz',
+        pendingDocuments: [
+          {
+            document: 'CPF',
+          },
+        ]
+      },
+      {
+        id: 12,
+        employee: 'Cacetinho da Silva',
+        pendingDocuments: [
+          {
+            document: 'CPF',
+          },
+          {
+            document: 'CNPJ',
+          },
+          {
+            document: 'CTPS',
+          },
+          {
+            document: 'CNH',
+          }
+        ]
+      },
+    ]
   }
 }
