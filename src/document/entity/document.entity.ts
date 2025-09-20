@@ -1,7 +1,7 @@
 import { Column, Entity, ManyToOne, PrimaryGeneratedColumn } from "typeorm";
-import { Employee } from "./employee.entity";
 import { DocumentType } from "./documenttype.entity";
 import { StatusEnum } from "src/enums/StatusDocument";
+import { Employee } from "src/employee/entity/employee.entity";
 
 @Entity()
 export class Document {

@@ -1,6 +1,6 @@
 import { StatusEnum } from "src/enums/StatusDocument";
 
-export interface DocumentDto {
+export interface DocumentDTO {
     name: string;
     status: StatusEnum;
     employeeid: number;

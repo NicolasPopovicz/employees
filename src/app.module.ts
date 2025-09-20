@@ -1,15 +1,12 @@
 import { Module } from '@nestjs/common';
 import { TypeOrmModule } from '@nestjs/typeorm';
 
-import { DocumentController } from 'src/document/document.controller';
-import { EmployeeController } from 'src/employee/employee.controller';
+import { DocumentModule } from './document/document.module';
+import { EmployeeModule } from './employee/employee.module';
 
-import { DocumentService } from './document/document.service';
-import { EmployeeService } from 'src/employee/employee.service';
-
-import { Document } from 'src/entities/document.entity';
-import { DocumentType } from 'src/entities/documenttype.entity';
-import { Employee } from 'src/entities/employee.entity';
+import { DocumentType } from './document/entity/documenttype.entity';
+import { Document } from './document/entity/document.entity';
+import { Employee } from './employee/entity/employee.entity';
 
 @Module({
   imports: [
@@ -23,14 +20,10 @@ import { Employee } from 'src/entities/employee.entity';
       entities: [Document, DocumentType, Employee],
       synchronize: true,
     }),
+    DocumentModule,
+    EmployeeModule,
   ],
-  controllers: [
-    DocumentController,
-    EmployeeController
-  ],
-  providers: [
-    DocumentService,
-    EmployeeService
-  ],
+  controllers: [],
+  providers: [],
 })
 export class AppModule {}
