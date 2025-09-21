@@ -1,7 +1,9 @@
 import { Column, Entity, JoinColumn, ManyToOne, PrimaryGeneratedColumn } from "typeorm";
+
 import { DocumentType } from "./documenttype.entity";
-import { StatusEnum } from "src/enums/StatusDocument";
 import { Employee } from "src/employee/entity/employee.entity";
+
+import { StatusEnum } from "src/enums/StatusDocument";
 
 @Entity({ name: 'document' })
 export class Document {
@@ -9,8 +11,9 @@ export class Document {
     id: number;
 
     @Column({
-        type: "varchar",
-        length: 100,
+        type:     "varchar",
+        length:   100,
+        nullable: true
     })
     name: string;
 

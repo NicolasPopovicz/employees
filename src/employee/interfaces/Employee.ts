@@ -1,5 +1,5 @@
 export interface Employee {
-    name: string;
+    name:     string;
     document: string;
-    hiredAt: string;
+    hiredAt:  string;
 }

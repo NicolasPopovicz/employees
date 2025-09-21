@@ -1,14 +1,14 @@
-export interface DefaultReturn {
-    message: string;
-    error?:  string;
-    status:  boolean;
-};
-
 interface PendingDocuments {
     id:     string;
     status: string;
     name:   string;
 }
+
+export interface DefaultReturn {
+    message: string;
+    error?:  string;
+    status:  boolean;
+};
 
 export interface PendingDocumentEmployee {
     employeeId:       number;
@@ -18,10 +18,10 @@ export interface PendingDocumentEmployee {
 
 export interface PagedPendingDocumentEmployee {
     getpendingdocumentsjson: {
-        currentPage: number;
-        totalPages: number;
+        currentPage:  number;
+        totalPages:   number;
         totalRecords: number;
-        hasNextPage: boolean;
-        data: PendingDocumentEmployee[]
+        hasNextPage:  boolean;
+        data:         PendingDocumentEmployee[]
     }
 }

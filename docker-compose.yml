@@ -1,0 +1,36 @@
+version: '3.8'
+
+services:
+  db:
+    image: postgres:latest  # Versão leve e estável do PostgreSQL
+    restart: always  # Reinicia sempre se o container cair (ex: falha no módulo de DB)
+    environment:
+      POSTGRES_USER: postgres  # Substitua pelos seus valores
+      POSTGRES_PASSWORD: postgres
+      POSTGRES_DB: employees
+    ports:
+      - "5432:5432"  # Expõe a porta para acesso local (opcional, remova se não precisar)
+    volumes:
+      - pgdata:/var/lib/postgresql/data  # Persiste dados do banco
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U seu_usuario -d employees"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+      start_period: 10s  # Tempo para o DB inicializar
+
+  app:
+    build: .  # Usa o Dockerfile da raiz
+    image: app-employees
+    restart: on-failure  # Reinicia a app se ela cair (ex: erro de conexão com DB)
+    depends_on:
+      db:
+        condition: service_healthy  # Espera o DB estar pronto (saudável) antes de iniciar a app
+    environment:
+      DATABASE_URL: postgres://postgres:postgres@db:5432/employees  # Conexão via nome do serviço 'db'
+      # Outras variáveis de ambiente da sua app NestJS (ex: PORT=3000)
+    ports:
+      - "3000:3000"  # Expõe a porta da app
+
+volumes:
+  pgdata:  # Volume nomeado para persistência do DB

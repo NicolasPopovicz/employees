@@ -1,50 +1,38 @@
-import { Injectable } from '@nestjs/common';
-import { EntityManager, Repository } from 'typeorm';
-import { DefaultReturn } from 'src/interfaces/ReturnObject';
-import { DocumentTypeDTO } from './dto/DocumentTypeDTO';
-import { DocumentType } from './entity/documenttype.entity';
+import { Injectable, InternalServerErrorException, Logger } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
+
+import { Repository } from 'typeorm';
+
+import { DefaultReturn } from 'src/interfaces/ReturnObject';
+
+import { DocumentType } from './entity/documenttype.entity';
+
+import { DocumentTypeDTO } from './dto/DocumentTypeDTO';
 
 @Injectable()
 export class DocumentService {
+    private readonly logger = new Logger(DocumentService.name);
+
     constructor(
-        private manager: EntityManager,
         @InjectRepository(DocumentType)
-        private documentTypeRepository: Repository<DocumentType>,
+        private readonly documentRepository: Repository<DocumentType>,
     ) {}
 
     async createDocument(documentType: DocumentTypeDTO): Promise<DefaultReturn> {
-        if (!documentType || typeof documentType === 'undefined') {
-            return {
-                message: 'Nenhum dado foi fornecido!',
-                status: false
-            };
-        }
-
-        if (documentType.name.length === 0) {
-            return {
-                message: 'O nome não pode ser vazio!',
-                status: false
-            };
-        }
-
         try {
-            await this.manager.query(`
-                INSERT INTO documenttype (name)
-                VALUES ($1)
-            `, [documentType.name]);
+            const partialCreate = this.documentRepository.create({
+                name: documentType.name
+            });
+
+            await this.documentRepository.save(partialCreate);
         } catch (error) {
-            console.log(`Ocorreu um erro durante a criação do tipo de documento.`, error);
-            return {
-                message: 'Ocorreu um erro durante a criação do tipo de documento.',
-                error: String(error),
-                status: false
-            };
+            this.logger.error('Erro ao criar tipo de documento', error.stack);
+            throw new InternalServerErrorException('Ocorreu um erro durante a criação do tipo de documento.');
         }
 
         return {
             status: true,
-            message: `Documento '${documentType.name}' criado com sucesso!`
-        }
+            message: `Documento '${documentType.name}' criado com sucesso!`,
+        };
     }
 }
