@@ -1,7 +1,7 @@
 import { Column, Entity, OneToMany, PrimaryGeneratedColumn } from "typeorm";
 import { Document } from "./document.entity";
 
-@Entity()
+@Entity({ name: 'documenttype' })
 export class DocumentType {
     @PrimaryGeneratedColumn()
     id: number;
@@ -12,6 +12,6 @@ export class DocumentType {
     })
     name: string;
 
-    @OneToMany(() => Document, (document) => document.documenttypeid)
+    @OneToMany(() => Document, (document) => document.iddocumenttype)
     documents: Document[];
 }

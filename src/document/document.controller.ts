@@ -8,13 +8,14 @@ export class DocumentController {
     constructor(private readonly documentService: DocumentService) {}
 
     @Post('/create')
-    create(@Body() documentType: DocumentTypeDTO, @Res() res: Response): Response {
-        const data = this.documentService.createDocument(documentType);
+    async create(@Body() documentType: DocumentTypeDTO, @Res() res: Response): Promise<Response> {
+        const data = await this.documentService.createDocument(documentType);
 
         return res.status(!data.status ? HttpStatus.BAD_REQUEST : HttpStatus.CREATED).json({
             success: data.status,
             data: {
-                message: data.message
+                message: data.message,
+                error: data.error
             }
         });
     }

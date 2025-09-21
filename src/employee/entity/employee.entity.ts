@@ -1,7 +1,7 @@
 import { Column, CreateDateColumn, Entity, OneToMany, PrimaryGeneratedColumn } from "typeorm";
 import { Document } from "src/document/entity/document.entity";
 
-@Entity()
+@Entity({ name: 'employee' })
 export class Employee {
     @PrimaryGeneratedColumn()
     id: number;
@@ -22,6 +22,6 @@ export class Employee {
     @CreateDateColumn()
     hiredAt: string;
 
-    @OneToMany(() => Document, (document) => document.employeeid)
+    @OneToMany(() => Document, (document) => document.idemployee)
     documents: Document[]
 }

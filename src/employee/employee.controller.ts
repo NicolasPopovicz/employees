@@ -1,63 +1,76 @@
-import { Body, Controller, HttpStatus, Param, Get, Post, Put, Res } from '@nestjs/common';
+import { Body, Controller, HttpStatus, Param, Get, Post, Put, Res, Query } from '@nestjs/common';
 import type { Response } from 'express';
 import type { EmployeeDTO } from './dto/EmployeeDTO';
+import type { DocumentTypeDTO } from 'src/document/dto/DocumentTypeDTO';
 import { EmployeeService } from 'src/employee/employee.service';
 
 @Controller('employee')
 export class EmployeeController {
-    constructor(private readonly employeeService: EmployeeService) { }
+    constructor(private readonly employeeService: EmployeeService) {}
 
     @Post('/new')
-    create(@Body() employeeDto: EmployeeDTO, @Res() res: Response): Response {
-        const data = this.employeeService.createEmployee(employeeDto);
+    async create(@Body() employeeDto: EmployeeDTO, @Res() res: Response): Promise<Response> {
+        const data = await this.employeeService.createEmployee(employeeDto);
 
         return res.status(!data.status ? HttpStatus.BAD_REQUEST : HttpStatus.CREATED).json({
             success: data.status,
-            data: data
+            data: {
+                message: data.message
+            }
         });
     }
 
     @Put('/update')
-    update(@Body() employeeDto: EmployeeDTO, @Res() res: Response): Response {
-        const data = this.employeeService.updateEmployee(employeeDto);
+    async update(@Body() employeeDto: EmployeeDTO, @Res() res: Response): Promise<Response> {
+        const data = await this.employeeService.updateEmployee(employeeDto);
 
         return res.status(!data.status ? HttpStatus.BAD_REQUEST : HttpStatus.OK).json({
             success: data.status,
-            data: data
+            data: {
+                message: data.message
+            }
         });
     }
 
-    @Get('/:id/documents/status')
-    listDocumentsStatus(@Param('id') id: string, @Res() res: Response): Response {
-        const data = this.employeeService.listEmployeeDocumentsStatus(id);
+    @Get('/:id/status/documents')
+    async listDocumentsStatus(@Param('id') id: string, @Res() res: Response): Promise<Response> {
+        const data = await this.employeeService.listEmployeeDocumentsStatus(id);
 
         return res.status('status' in data && !data.status ? HttpStatus.BAD_REQUEST : HttpStatus.OK).json({
-            success: 'documents' in data,
+            success: 'status' in data || data.length > 0,
             data: data
         });
     }
 
-    @Get('/list/documents/pending')
-    listPendingDocuments(@Res() res: Response): Response {
-        const data = this.employeeService.listEmployeesPendingDocuments();
+    @Get('/list/pending/documents')
+    async listPendingDocuments(@Query() params: any, @Res() res: Response): Promise<Response> {
+        const data = await this.employeeService.listEmployeesPendingDocuments(params);
 
-        return res.status(typeof data === "object" ? HttpStatus.OK : HttpStatus.BAD_REQUEST).json({
-            success: true,
-            data: data
+        return res.status('status' in data && !data.status ? HttpStatus.BAD_REQUEST : HttpStatus.OK).json({
+            success: 'status' in data || 'getpendingdocumentsjson' in data,
+            data: 'getpendingdocumentsjson' in data ? data.getpendingdocumentsjson : data
         });
     }
 
-    // @Post('/:id/document/send')
-    // sendDocument(@Param('id') id: string, @Res() res: Response): Response  {
+    @Post('/:id/send/document')
+    async sendDocument(@Param('id') id: string, @Body() documentType: DocumentTypeDTO, @Res() res: Response): Promise<Response>  {
+        const data = await this.employeeService.sendDocument(id, documentType);
 
-    // }
+        return res.status(!data.status ? HttpStatus.BAD_REQUEST : HttpStatus.CREATED).json({
+            success: data.status,
+            data: {
+                message: data.message,
+                error: data.error
+            }
+        });
+    }
 
-    // @Post('/:id/documents/link')
+    // @Post('/:id/link/documents')
     // linkDocuments(@Res() res: Response): Response  {
 
     // }
 
-    // @Post('/:id/documents/unlink')
+    // @Post('/:id/unlink/documents')
     // unlinkDocuments(@Res() res: Response): Response  {
 
     // }

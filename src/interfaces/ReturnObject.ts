@@ -1,25 +1,27 @@
-import { StatusEnum } from "src/enums/StatusDocument";
-
-interface Document {
-    type: string;
-    status: StatusEnum.PENDING | StatusEnum.SENDED;
-}
-
 export interface DefaultReturn {
     message: string;
-    status: boolean;
+    error?:  string;
+    status:  boolean;
 };
 
-export interface ListDocuments {
-    id: number;
-    employee: string;
-    documents: Document[];
+interface PendingDocuments {
+    id:     string;
+    status: string;
+    name:   string;
 }
 
 export interface PendingDocumentEmployee {
-    id: number;
-    employee: string;
-    pendingDocuments: {
-        document: string;
-    }[];
+    employeeId:       number;
+    employeeName:     string;
+    pendingDocuments: PendingDocuments[];
+}
+
+export interface PagedPendingDocumentEmployee {
+    getpendingdocumentsjson: {
+        currentPage: number;
+        totalPages: number;
+        totalRecords: number;
+        hasNextPage: boolean;
+        data: PendingDocumentEmployee[]
+    }
 }
