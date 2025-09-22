@@ -1,3 +1,31 @@
+DROP TABLE IF EXISTS employee CASCADE;
+DROP TABLE IF EXISTS documenttype CASCADE;
+DROP TABLE IF EXISTS document CASCADE;
+
+DROP TYPE IF EXISTS document_status CASCADE;
+
+CREATE TYPE document_status AS ENUM ('ENVIADO', 'PENDENTE');
+
+CREATE TABLE employee (
+    id             SERIAL PRIMARY KEY,
+    name           VARCHAR(150) NOT NULL,
+    document       VARCHAR(14),
+    hiredat        TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_DATE
+);
+
+CREATE TABLE documenttype (
+    id             SERIAL PRIMARY KEY,
+    name           VARCHAR(100) UNIQUE
+);
+
+CREATE TABLE document (
+    id             SERIAL PRIMARY KEY,
+    name           VARCHAR(100),
+    status         document_status NOT NULL,
+    idemployee     INTEGER REFERENCES employee(id),
+    iddocumenttype INTEGER REFERENCES documenttype(id)
+);
+
 DROP FUNCTION IF EXISTS getPendingDocumentsJSON;
 
 CREATE OR REPLACE FUNCTION getPendingDocumentsJSON (
