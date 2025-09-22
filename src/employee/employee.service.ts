@@ -37,14 +37,14 @@ export class EmployeeService {
     ): Promise<DefaultReturn> {
         try {
             const partialCreate = this.employeeRepository.create({
-                name: employee.name,
+                name:     employee.name,
                 document: employee.document
             });
 
             await this.employeeRepository.save(partialCreate);
         } catch (error) {
             this.logger.error('Erro ao criar tipo de documento', error.stack);
-            throw new InternalServerErrorException('Ocorreu um erro durante a criação do tipo de documento.');
+            throw new InternalServerErrorException(`Ocorreu um erro durante a criação do colaborador '${employee.name}'.`);
         }
 
         return {
@@ -65,7 +65,7 @@ export class EmployeeService {
             });
         } catch (error) {
             this.logger.error('Erro durante a atualização do colaborador.', error.stack);
-            throw new InternalServerErrorException('Ocorreu um erro durante a atualização do colaborador.');
+            throw new InternalServerErrorException(`Ocorreu um erro durante a atualização do colaborador '${employee.name}'.`);
         }
 
         return {
@@ -101,8 +101,8 @@ export class EmployeeService {
                 GROUP BY e.id, e.name
             `, [Number(id)]);
         } catch (error) {
-            this.logger.error('Erro durante a listagem dos status dos documentos.', error.stack);
-            throw new InternalServerErrorException('Ocorreu um erro durante a listagem dos status dos documentos.');
+            this.logger.error('Erro durante a listagem dos status dos documentos dos colaboradores.', error.stack);
+            throw new InternalServerErrorException('Ocorreu um erro durante a listagem dos status dos documentos dos colaboradores.');
         }
 
         return pendingDocs.length === 0 ? {
@@ -121,8 +121,8 @@ export class EmployeeService {
                 SELECT getpendingdocumentsjson($1, $2, $3)
             `, [StatusEnum.PENDING, params.page ?? 1, params.totalrecords ?? 10]);
         } catch (error) {
-            this.logger.error('Erro durante listagem dos documentos pendentes.', error.stack);
-            throw new InternalServerErrorException('Ocorreu um erro durante listagem dos documentos pendentes.');
+            this.logger.error('Erro durante listagem dos documentos pendentes dos colaboradores.', error.stack);
+            throw new InternalServerErrorException('Ocorreu um erro durante listagem dos documentos pendentes dos colaboradores.');
         }
 
         if (!pendingDocs[0]?.getpendingdocumentsjson) {
@@ -166,9 +166,9 @@ export class EmployeeService {
         try {
             await this.documentRepository.update({
                 idemployee: { id: Number(id) },
-                id: In(linkDocs.documentIds),
+                id:         In(linkDocs.documentIds),
             }, {
-                status: StatusEnum.SENDED,
+                status:     StatusEnum.SENDED,
             });
         } catch (error) {
             this.logger.error('Erro durante o vinculo dos documentos ao colaborador.', error.stack);

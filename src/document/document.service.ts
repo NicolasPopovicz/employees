@@ -27,7 +27,7 @@ export class DocumentService {
             await this.documentRepository.save(partialCreate);
         } catch (error) {
             this.logger.error('Erro ao criar tipo de documento', error.stack);
-            throw new InternalServerErrorException('Ocorreu um erro durante a criação do tipo de documento.');
+            throw new InternalServerErrorException(`Ocorreu um erro durante a criação do tipo de documento. Parece que o documento '${documentType.name}' já existe!`);
         }
 
         return {

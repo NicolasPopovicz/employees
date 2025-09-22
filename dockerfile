@@ -24,4 +24,5 @@ COPY --from=builder /employees/dist ./dist
 EXPOSE 3000
 
 # Comando para rodar a app
+# CMD ["npm", "run", "start:dev"]
 CMD ["node", "dist/main.js"]

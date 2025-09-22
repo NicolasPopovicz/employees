@@ -10,7 +10,8 @@ export class Employee {
     @Column({
         type:     "varchar",
         length:   150,
-        nullable: false
+        nullable: false,
+        unique:   true
     })
     name: string;
 

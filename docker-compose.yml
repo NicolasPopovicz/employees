@@ -34,6 +34,10 @@ services:
       DB_DATABASE: employees
     ports:
       - "3000:3000"
+    # volumes:
+    #   - .:/employees      # monta seu código local no container
+    #   - /employees/node_modules  # evita conflito dos node_modules
+    # command: npm run start:dev   # roda em modo dev
 
 volumes:
   pgdata:

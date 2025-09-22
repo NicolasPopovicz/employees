@@ -8,7 +8,8 @@ export class DocumentType {
 
     @Column({
         type:   "varchar",
-        length: 100
+        length: 100,
+        unique: true
     })
     name: string;
 
