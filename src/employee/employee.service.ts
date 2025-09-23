@@ -1,7 +1,6 @@
-import { Injectable, InternalServerErrorException, Logger } from '@nestjs/common';
+import { HttpStatus, Injectable, InternalServerErrorException, Logger } from '@nestjs/common';
+import { DataSource, EntityManager, ILike, In, Repository } from 'typeorm';
 import { InjectRepository } from '@nestjs/typeorm';
-
-import { DataSource, EntityManager, In, Repository } from 'typeorm';
 
 import {
     DefaultReturn,
@@ -17,6 +16,7 @@ import { StatusEnum } from 'src/enums/StatusDocument';
 
 import { Employee } from './entity/employee.entity';
 import { Document } from 'src/document/entity/document.entity';
+import { DocumentType } from 'src/document/entity/documenttype.entity';
 
 @Injectable()
 export class EmployeeService {
@@ -30,12 +30,28 @@ export class EmployeeService {
 
         @InjectRepository(Document)
         private readonly documentRepository: Repository<Document>,
+
+        @InjectRepository(DocumentType)
+        private readonly documentTypeRepository: Repository<DocumentType>,
     ) {}
 
-    async createEmployee(
-        employee: EmployeeDTO
-    ): Promise<DefaultReturn> {
+    async createEmployee(employee: EmployeeDTO): Promise<DefaultReturn> {
         try {
+            const checkIfExists = await this.employeeRepository.find({
+                where: {
+                    name:     ILike(`%${employee.name}%`),
+                    document: ILike(`%${employee.document}%`)
+                }
+            });
+
+            if (checkIfExists.length) {
+                return {
+                    success: false,
+                    status:  HttpStatus.BAD_REQUEST,
+                    message: 'Já existe um colaborador com estes dados!',
+                };
+            }
+
             const partialCreate = this.employeeRepository.create({
                 name:     employee.name,
                 document: employee.document
@@ -48,20 +64,29 @@ export class EmployeeService {
         }
 
         return {
+            success: true,
+            status:  HttpStatus.CREATED,
             message: `Colaborador '${employee.name}' cadastrado com sucesso!`,
-            status: true
         };
     }
 
-    async updateEmployee(
-        employee: EmployeeDTO
-    ): Promise<DefaultReturn> {
+    async updateEmployee(employee: EmployeeDTO): Promise<DefaultReturn> {
         try {
+            const checkIfExists = await this.employeeRepository.findOneBy({ id: employee.id });
+
+            if (!checkIfExists) {
+                return {
+                    success: false,
+                    status:  HttpStatus.BAD_REQUEST,
+                    message: `Não encontramos o colaborador '${employee.name}'`,
+                };
+            }
+
             await this.employeeRepository.update({
-                name:     employee.name,
-                document: employee.document,
-            }, {
                 id:       employee.id,
+            }, {
+                name:     employee.name,
+                document: employee.document
             });
         } catch (error) {
             this.logger.error('Erro durante a atualização do colaborador.', error.stack);
@@ -69,14 +94,13 @@ export class EmployeeService {
         }
 
         return {
+            success: true,
+            status:  HttpStatus.OK,
             message: `Colaborador '${employee.name}' atualizado com sucesso!`,
-            status: true
         };
     }
 
-    async listEmployeeDocumentsStatus(
-        id: string
-    ): Promise<DefaultReturn | PendingDocumentEmployee[]> {
+    async listEmployeeDocumentsStatus(id: string): Promise<DefaultReturn> {
         let pendingDocs: PendingDocumentEmployee[] = [];
 
         const dbDriver: DataSource = (!this.manager.connection.isInitialized)
@@ -105,43 +129,78 @@ export class EmployeeService {
             throw new InternalServerErrorException('Ocorreu um erro durante a listagem dos status dos documentos dos colaboradores.');
         }
 
-        return pendingDocs.length === 0 ? {
-            message: 'Não há colaboradores com documentos pendentes!',
-            status: true
-        } : pendingDocs;
+        const message = pendingDocs.length === 0
+            ? 'Este colaborador não possui documentos vinculados'
+            : 'Listagem dos status dos documentos do colaborador'
+
+        return {
+            success: true,
+            status:  HttpStatus.OK,
+            message: message,
+            data:    pendingDocs
+        };
     }
 
     async listEmployeesPendingDocuments(
-        params: any
-    ): Promise<DefaultReturn | PagedPendingDocumentEmployee> {
+        page: number = 1,
+        totalrecords: number = 10,
+        employee: string = '',
+        documenttype: string = ''
+    ): Promise<DefaultReturn> {
         let pendingDocs: PagedPendingDocumentEmployee[];
 
         try {
             pendingDocs = await this.manager.connection.query<PagedPendingDocumentEmployee[]>(`
-                SELECT getpendingdocumentsjson($1, $2, $3)
-            `, [StatusEnum.PENDING, params.page ?? 1, params.totalrecords ?? 10]);
+                SELECT getpendingdocumentsjson($1, $2, $3, $4, $5)
+            `, [employee, documenttype, StatusEnum.PENDING, page, totalrecords]);
         } catch (error) {
             this.logger.error('Erro durante listagem dos documentos pendentes dos colaboradores.', error.stack);
             throw new InternalServerErrorException('Ocorreu um erro durante listagem dos documentos pendentes dos colaboradores.');
         }
 
-        if (!pendingDocs[0]?.getpendingdocumentsjson) {
+        const checkResult = pendingDocs[0]?.getpendingdocumentsjson;
+
+        if (!checkResult) {
             return {
+                success: true,
+                status:  HttpStatus.OK,
                 message: 'Não há colaboradores com documentos pendentes!',
-                status: true
             };
         }
 
-        return pendingDocs[0];
+        return {
+            success: true,
+            status:  HttpStatus.OK,
+            message: 'Listagem de colaboradores com documentos pendentes',
+            data:    checkResult
+        };
     }
 
-    async sendDocument(
-        id: string,
-        documentType: DocumentTypeDTO
-    ): Promise<DefaultReturn> {
+    async sendDocument(id: string, documentType: DocumentTypeDTO): Promise<DefaultReturn> {
         try {
+            const checkIfEmployeeExists = await this.employeeRepository.findOneBy({ id: Number(id) });
+            const checkIfDocTypeExists  = await this.documentTypeRepository.findOneBy({ id: documentType.id });
+
+            console.log(checkIfEmployeeExists);
+
+            if (!checkIfEmployeeExists) {
+                return {
+                    success: true,
+                    status:  HttpStatus.BAD_REQUEST,
+                    message: 'Não encontramos o colaborador com os dados fornecidos na nossa base!'
+                };
+            }
+
+            if (!checkIfDocTypeExists) {
+                return {
+                    success: true,
+                    status:  HttpStatus.BAD_REQUEST,
+                    message: 'Não encontramos o tipo de documento com os dados fornecidos na nossa base!'
+                };
+            }
+
             const partialCreate = this.documentRepository.create({
-                name:           '',
+                name:           documentType.name,
                 status:         StatusEnum.PENDING,
                 idemployee:     { id: Number(id) },
                 iddocumenttype: { id: documentType.id }
@@ -154,52 +213,48 @@ export class EmployeeService {
         }
 
         return {
-            message: `Documento '${documentType.name}' atribuído com sucesso ao colaborador!`,
-            status: true
+            success: true,
+            status:  HttpStatus.OK,
+            message: `Documento '${documentType.name}' atribuído com sucesso ao colaborador!`
         };
     }
 
-    async linkEmployeeDocuments(
-        id: string,
-        linkDocs: LinkAndUnlinkDocumentsDTO
-    ): Promise<DefaultReturn> {
+    async linkOrUnlineEmployeeDocuments(id: string, status: StatusEnum, linkDocs: LinkAndUnlinkDocumentsDTO): Promise<DefaultReturn> {
+        const typeMessage = status === StatusEnum.SENDED ? 'vinculo' : 'desvinculo';
+
         try {
+            const checkIfExists = await this.documentRepository.find({
+                where: {
+                    id:         In(linkDocs.documentIds),
+                    idemployee: { id: Number(id) }
+                }
+            })
+
+            console.log(status);
+
+            if (!checkIfExists) {
+                return {
+                    success: false,
+                    status:  HttpStatus.BAD_REQUEST,
+                    message: 'Não encontramos o documento a ser atualizado!',
+                };
+            }
+
             await this.documentRepository.update({
-                idemployee: { id: Number(id) },
                 id:         In(linkDocs.documentIds),
+                idemployee: { id: Number(id) }
             }, {
-                status:     StatusEnum.SENDED,
+                status:     status,
             });
         } catch (error) {
-            this.logger.error('Erro durante o vinculo dos documentos ao colaborador.', error.stack);
-            throw new InternalServerErrorException('Ocorreu um erro durante o vinculo dos documentos ao colaborador.');
+            this.logger.error(`Erro durante o ${typeMessage} dos documentos ao colaborador.`, error.stack);
+            throw new InternalServerErrorException(`Ocorreu um erro durante o ${typeMessage} dos documentos ao colaborador.`);
         }
 
         return {
-            message: `Documentos vinculados do colaborador com sucesso!`,
-            status: true
-        };
-    }
-
-    async unlinkEmployeeDocuments(
-        id: string,
-        linkDocs: LinkAndUnlinkDocumentsDTO
-    ): Promise<DefaultReturn> {
-        try {
-            await this.documentRepository.update({
-                idemployee: { id: Number(id) },
-                id:         In(linkDocs.documentIds),
-            }, {
-                status:     StatusEnum.PENDING,
-            });
-        } catch (error) {
-            this.logger.error('Erro ao desvincular dos documentos ao colaborador.', error.stack);
-            throw new InternalServerErrorException('Ocorreu um erro ao desvincular dos documentos ao colaborador.');
-        }
-
-        return {
-            message: `Documentos desvinculados do colaborador com sucesso!`,
-            status: true
+            success: true,
+            status:  HttpStatus.CREATED,
+            message: `Documentos ${status === StatusEnum.SENDED ? 'vinculados ao' : 'desvinculados do'} colaborador com sucesso!`
         };
     }
 }

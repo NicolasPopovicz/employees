@@ -1,7 +1,7 @@
-import { Injectable, InternalServerErrorException, Logger } from '@nestjs/common';
+import { HttpStatus, Injectable, InternalServerErrorException, Logger } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 
-import { Repository } from 'typeorm';
+import { ILike, Repository } from 'typeorm';
 
 import { DefaultReturn } from 'src/interfaces/ReturnObject';
 
@@ -20,6 +20,18 @@ export class DocumentService {
 
     async createDocument(documentType: DocumentTypeDTO): Promise<DefaultReturn> {
         try {
+            const checkIfExists = await this.documentRepository.find({
+                where: { name: ILike(`%${documentType.name}%`) }
+            })
+
+            if (checkIfExists.length) {
+                return {
+                    success: false,
+                    status:  HttpStatus.BAD_REQUEST,
+                    message: `O documento '${documentType.name}' já existe!`,
+                };
+            }
+
             const partialCreate = this.documentRepository.create({
                 name: documentType.name
             });
@@ -27,11 +39,12 @@ export class DocumentService {
             await this.documentRepository.save(partialCreate);
         } catch (error) {
             this.logger.error('Erro ao criar tipo de documento', error.stack);
-            throw new InternalServerErrorException(`Ocorreu um erro durante a criação do tipo de documento. Parece que o documento '${documentType.name}' já existe!`);
+            throw new InternalServerErrorException('Ocorreu um erro durante a criação do tipo de documento.');
         }
 
         return {
-            status: true,
+            success: true,
+            status:  HttpStatus.CREATED,
             message: `Documento '${documentType.name}' criado com sucesso!`,
         };
     }

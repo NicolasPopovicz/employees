@@ -1,10 +1,18 @@
-import { Body, Controller, HttpStatus, Post, Res } from '@nestjs/common';
+import { Body, Controller, Post, Res } from '@nestjs/common';
+import {
+    ApiInternalServerErrorResponse,
+    ApiNotFoundResponse,
+    ApiOkResponse,
+    ApiOperation
+} from '@nestjs/swagger';
+
 import type { Response } from 'express';
 
 import { DocumentTypeDTO } from './dto/DocumentTypeDTO';
 
 import { DocumentService } from './document.service';
-import { ApiOperation, ApiResponse } from '@nestjs/swagger';
+
+import { DefaultReturn } from 'src/interfaces/ReturnObject';
 
 @Controller('document')
 export class DocumentController {
@@ -12,20 +20,12 @@ export class DocumentController {
 
     @Post('/create')
     @ApiOperation({ summary: 'Cria um tipo de documento.' })
-    @ApiResponse({ status: 201, description: 'Documento "CNH" criado com sucesso!' })
-    @ApiResponse({ status: 400, description: 'Ocorreu um erro durante a criação do tipo de documento. Parece que o documento "CNH" já existe!' })
-    async create(
-        @Body() documentType: DocumentTypeDTO,
-        @Res() res: Response,
-    ): Promise<Response> {
+    @ApiOkResponse({ description: 'Documento "CNH" criado com sucesso!' })
+    @ApiNotFoundResponse({ description: 'O documento "CNH" já existe!' })
+    @ApiInternalServerErrorResponse({ description: 'Ocorreu um erro durante a criação do tipo de documento.' })
+    async create(@Res() res: Response, @Body() documentType: DocumentTypeDTO): Promise<Response<DefaultReturn>> {
         const data = await this.documentService.createDocument(documentType);
 
-        return res.status(HttpStatus.CREATED).json({
-            success: data.status,
-            data: {
-                message: data.message,
-                error:   data.error
-            },
-        });
+        return res.status(data.status).json(data);
     }
 }

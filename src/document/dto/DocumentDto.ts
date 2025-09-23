@@ -10,7 +10,7 @@ export class DocumentDTO {
 
     @IsEnum(StatusEnum)
     @IsNotEmpty({ message: "O parâmetro 'status' é obrigatório!" })
-    @ApiProperty({ name: 'status', enum: StatusEnum, enumName: 'StatusEnum', example: 'PENDENTE' })
+    @ApiProperty({ name: "status", enum: StatusEnum, enumName: "StatusEnum", example: "PENDENTE" })
     status: StatusEnum;
 
     @IsNumber({}, { message: "ID precisa ser um número!" })

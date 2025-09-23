@@ -5,9 +5,10 @@ interface PendingDocuments {
 }
 
 export interface DefaultReturn {
+    success: boolean;
+    status:  number;
     message: string;
-    error?:  string;
-    status:  boolean;
+    data?:   object;
 };
 
 export interface PendingDocumentEmployee {
