@@ -15,7 +15,7 @@ import { Employee } from './employee/entity/employee.entity';
             host: process.env.DB_HOST ?? 'localhost',
             port: 5432,
             username: process.env.DB_USERNAME ?? 'postgres',
-            password: process.env.DB_PASSWORD ?? 'a',
+            password: process.env.DB_PASSWORD ?? 'postgres',
             database: process.env.DB_DATABASE ?? 'employees',
             entities: [Document, DocumentType, Employee],
             synchronize: true,

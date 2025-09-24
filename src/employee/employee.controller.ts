@@ -22,6 +22,7 @@ import type { Response } from 'express';
 
 import { EmployeeDTO } from './dto/EmployeeDTO';
 import { DocumentTypeDTO } from 'src/document/dto/DocumentTypeDTO';
+import { ListDocumentsQueryDto } from './dto/ListDocumentsQueryDTO';
 import { LinkAndUnlinkDocumentsDTO } from './dto/LinkAndUnlinkDocumentsDTO';
 
 import { EmployeeService } from 'src/employee/employee.service';
@@ -57,7 +58,7 @@ export class EmployeeController {
     }
 
     @Get('/:id/status/documents')
-    @ApiOkResponse({})
+    @ApiOkResponse({ description: 'Listagem dos status dos documentos do colaborador' })
     @ApiInternalServerErrorResponse({ description: 'Ocorreu um erro durante a listagem dos status dos documentos do colaborador.' })
     @ApiOperation({ summary: 'Lista todos os documentos do colaborador, passando seu id como parâmetro' })
     async listDocumentsStatus(@Res() res: Response, @Param('id', ParseIntPipe) id: string): Promise<Response<DefaultReturn>> {
@@ -67,22 +68,11 @@ export class EmployeeController {
     }
 
     @Get('/list/pending/documents')
-    @ApiOkResponse({})
+    @ApiOkResponse({ description: 'Listagem de colaboradores com documentos pendentes' })
     @ApiInternalServerErrorResponse({ description: 'Ocorreu um erro durante listagem dos documentos pendentes dos colaboradores.' })
     @ApiOperation({ summary: 'Lista todos os documentos de todos os colaboradores ou de um colaborador específico.' })
-    async listPendingDocuments(
-        @Res() res: Response,
-        @Query('page') page: number,
-        @Query('totalrecords') totalrecords: number,
-        @Query('employee') employee?: string,
-        @Query('documenttype') documenttype?: string,
-    ): Promise<Response<DefaultReturn>> {
-        const data = await this.employeeService.listEmployeesPendingDocuments(
-            page,
-            totalrecords,
-            employee,
-            documenttype
-        );
+    async listPendingDocuments(@Res() res: Response, @Query() query: ListDocumentsQueryDto): Promise<Response<DefaultReturn>> {
+        const data = await this.employeeService.listEmployeesPendingDocuments(query);
 
         return res.status(data.status).json(data);
     }

@@ -10,6 +10,7 @@ import {
 
 import { EmployeeDTO } from './dto/EmployeeDTO';
 import { DocumentTypeDTO } from 'src/document/dto/DocumentTypeDTO';
+import { ListDocumentsQueryDto } from './dto/ListDocumentsQueryDTO';
 import { LinkAndUnlinkDocumentsDTO } from './dto/LinkAndUnlinkDocumentsDTO';
 
 import { StatusEnum } from 'src/enums/StatusDocument';
@@ -141,18 +142,13 @@ export class EmployeeService {
         };
     }
 
-    async listEmployeesPendingDocuments(
-        page: number = 1,
-        totalrecords: number = 10,
-        employee: string = '',
-        documenttype: string = ''
-    ): Promise<DefaultReturn> {
+    async listEmployeesPendingDocuments(query: ListDocumentsQueryDto): Promise<DefaultReturn> {
         let pendingDocs: PagedPendingDocumentEmployee[];
 
         try {
             pendingDocs = await this.manager.connection.query<PagedPendingDocumentEmployee[]>(`
                 SELECT getpendingdocumentsjson($1, $2, $3, $4, $5)
-            `, [employee, documenttype, StatusEnum.PENDING, page, totalrecords]);
+            `, [query.employee, query.documenttype, StatusEnum.PENDING, query.page, query.totalrecords]);
         } catch (error) {
             this.logger.error('Erro durante listagem dos documentos pendentes dos colaboradores.', error.stack);
             throw new InternalServerErrorException('Ocorreu um erro durante listagem dos documentos pendentes dos colaboradores.');
@@ -230,9 +226,7 @@ export class EmployeeService {
                 }
             })
 
-            console.log(status);
-
-            if (!checkIfExists) {
+            if (!checkIfExists.length) {
                 return {
                     success: false,
                     status:  HttpStatus.BAD_REQUEST,
