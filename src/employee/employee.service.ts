@@ -177,8 +177,6 @@ export class EmployeeService {
             const checkIfEmployeeExists = await this.employeeRepository.findOneBy({ id: Number(id) });
             const checkIfDocTypeExists  = await this.documentTypeRepository.findOneBy({ id: documentType.id });
 
-            console.log(checkIfEmployeeExists);
-
             if (!checkIfEmployeeExists) {
                 return {
                     success: true,
