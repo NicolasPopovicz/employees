@@ -12,10 +12,13 @@ import { DocumentTypeDTO } from './dto/DocumentTypeDTO';
 
 import { DocumentService } from './document.service';
 
-import { DefaultReturn } from 'src/interfaces/ReturnObject';
+import { DefaultReturn } from '../interfaces/ReturnObject';
 
 @Controller('document')
 export class DocumentController {
+    listPendingDocuments(): any {
+        throw new Error('Method not implemented.');
+    }
     constructor(private readonly documentService: DocumentService) { }
 
     @Post('/create')

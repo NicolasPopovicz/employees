@@ -6,18 +6,18 @@ import {
     DefaultReturn,
     PagedPendingDocumentEmployee,
     PendingDocumentEmployee
-} from 'src/interfaces/ReturnObject';
+} from '../interfaces/ReturnObject';
 
 import { EmployeeDTO } from './dto/EmployeeDTO';
-import { DocumentTypeDTO } from 'src/document/dto/DocumentTypeDTO';
+import { DocumentTypeDTO } from '../document/dto/DocumentTypeDTO';
 import { ListDocumentsQueryDto } from './dto/ListDocumentsQueryDTO';
 import { LinkAndUnlinkDocumentsDTO } from './dto/LinkAndUnlinkDocumentsDTO';
 
-import { StatusEnum } from 'src/enums/StatusDocument';
+import { StatusEnum } from '../enums/StatusDocument';
 
 import { Employee } from './entity/employee.entity';
-import { Document } from 'src/document/entity/document.entity';
-import { DocumentType } from 'src/document/entity/documenttype.entity';
+import { Document } from '../document/entity/document.entity';
+import { DocumentType } from '../document/entity/documenttype.entity';
 
 @Injectable()
 export class EmployeeService {

@@ -3,7 +3,7 @@ import { InjectRepository } from '@nestjs/typeorm';
 
 import { ILike, Repository } from 'typeorm';
 
-import { DefaultReturn } from 'src/interfaces/ReturnObject';
+import { DefaultReturn } from '../interfaces/ReturnObject';
 
 import { DocumentType } from './entity/documenttype.entity';
 

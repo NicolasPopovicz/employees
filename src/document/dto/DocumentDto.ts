@@ -1,6 +1,6 @@
 import { ApiProperty } from "@nestjs/swagger";
 import { IsString, IsNotEmpty, IsNumber, IsEnum } from "class-validator";
-import { StatusEnum } from "src/enums/StatusDocument";
+import { StatusEnum } from "../../enums/StatusDocument";
 
 export class DocumentDTO {
     @IsString({ message: "O parâmetro 'name' precisa ser uma string!" })

@@ -21,15 +21,15 @@ import {
 import type { Response } from 'express';
 
 import { EmployeeDTO } from './dto/EmployeeDTO';
-import { DocumentTypeDTO } from 'src/document/dto/DocumentTypeDTO';
+import { DocumentTypeDTO } from '../document/dto/DocumentTypeDTO';
 import { ListDocumentsQueryDto } from './dto/ListDocumentsQueryDTO';
 import { LinkAndUnlinkDocumentsDTO } from './dto/LinkAndUnlinkDocumentsDTO';
 
-import { EmployeeService } from 'src/employee/employee.service';
+import { EmployeeService } from './employee.service';
 
-import { DefaultReturn } from 'src/interfaces/ReturnObject';
+import { DefaultReturn } from '../interfaces/ReturnObject';
 
-import { StatusEnum } from 'src/enums/StatusDocument';
+import { StatusEnum } from '../enums/StatusDocument';
 
 @Controller('employee')
 export class EmployeeController {

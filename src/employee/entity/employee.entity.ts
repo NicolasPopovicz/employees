@@ -1,6 +1,6 @@
 import { Column, CreateDateColumn, Entity, OneToMany, PrimaryGeneratedColumn } from "typeorm";
 
-import { Document } from "src/document/entity/document.entity";
+import { Document } from "../../document/entity/document.entity";
 
 @Entity({ name: 'employee' })
 export class Employee {
