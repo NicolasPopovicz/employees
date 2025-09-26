@@ -92,6 +92,8 @@ docker-compose up --build
 docker compose up --build
 ```
 
+Se optar por rodar na própria máquina, certifique-se de que o Postgre esteja instalado. Também será necessário rodar os arquivos `.sql` que se encontram no diretório `/sql`.
+
 A API estará disponível em: http://localhost:3000
 
 A documentação da API está dicponível em: http://localhost:3000/api
