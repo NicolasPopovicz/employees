@@ -39,10 +39,10 @@ export class EmployeeService {
     async createEmployee(employee: EmployeeDTO): Promise<DefaultReturn> {
         try {
             const checkIfExists = await this.employeeRepository.find({
-                where: {
-                    name:     ILike(`%${employee.name}%`),
-                    document: ILike(`%${employee.document}%`)
-                }
+                where: [
+                    { name:     ILike(`%${employee.name}%`) },
+                    { document: ILike(`%${employee.document}%`) },
+                ]
             });
 
             if (checkIfExists.length) {
@@ -225,10 +225,14 @@ export class EmployeeService {
             })
 
             if (!checkIfExists.length) {
+                const message = linkDocs.documentIds.length > 1
+                    ? 'os documentos a serem atualizados'
+                    : 'o documento a ser atualizado';
+
                 return {
                     success: false,
                     status:  HttpStatus.BAD_REQUEST,
-                    message: 'Não encontramos o documento a ser atualizado!',
+                    message: `Não encontramos ${message} para este usuário!`,
                 };
             }
 
