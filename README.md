@@ -85,10 +85,6 @@ npm install
 npm run start:dev
 
 # Rodar via Docker
-# No Windows
-docker-compose up --build
-
-# No Linux
 docker compose up --build
 ```
 
